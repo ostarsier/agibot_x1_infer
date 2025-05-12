@@ -24,6 +24,10 @@ class VLAController : public ControllerBase {
   
   // Redis连接对象
   redisContext* redis_ctx_{nullptr};
+
+  // 刚度和阻尼参数
+  std::vector<double> stiffness_;
+  std::vector<double> damping_;
 };
 
 }  // namespace xyber_x1_infer::rl_control_module

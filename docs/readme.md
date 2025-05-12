@@ -73,3 +73,14 @@ robot-infer/doc/dcu_driver_module/dcu_driver_module.zh_CN.md:
 # 夹爪 key
 仿真环境state中没有夹爪
 robot-infer/src/module/dcu_driver_module/cfg/dcu_x1.yaml
+
+
+
+
+# redis
+
+LPUSH joint_position '[0.0,0.0,0.0,100,0.0,0.0,0.0]' 
+
+
+joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint, right_elbow_pitch_joint, right_elbow_yaw_joint, right_wrist_pitch_joint, right_wrist_roll_joint]
+    init_state: [0.0,   0.0,   0.0,   100,   0.0,   0.0,   0.0]

@@ -57,7 +57,7 @@ robot_states:
   # vla模式
   stand_&_vla:
     trigger_topic: /vla_mode
-    pre_states: [stand, stand_&_vla]
+    pre_states: [zero, stand, stand_&_vla]
     controllers: [pd_zero, pd_stand, vla]
 # ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
@@ -239,12 +239,21 @@ controllers:
 
   # vla
   vla:
-    joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint, right_elbow_pitch_joint, right_elbow_yaw_joint, right_wrist_pitch_joint, right_wrist_roll_joint]
-    init_state: [0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0]
+    joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint,
+     right_elbow_pitch_joint, right_elbow_yaw_joint, 
+     right_wrist_pitch_joint, right_wrist_roll_joint]
+    stiffness:  [300.0, 300.0, 300.0,
+                 300.0, 300.0,
+                 300.0, 300.0]
+    damping:    [0.6,   0.6,   0.6,
+                 0.6,   0.6,
+                 0.6,   0.6]
     redis_conf:
       host: "192.168.110.91"
       port: 6379
       key: "joint_position"
+      timeout: 2
+    
 
   # walk
   rl_walk_leg:
