@@ -54,10 +54,12 @@ robot_states:
     trigger_topic: /plan_mode
     pre_states: [walk_leg, walk_leg_&_plan]
     controllers: [pd_zero, pd_stand, rl_walk_leg, pd_plan]
-# ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-
-
-# ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ joint_list ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  # vla模式
+  stand_&_vla:
+    trigger_topic: /vla_mode
+    pre_states: [stand, stand_&_vla]
+    controllers: [pd_zero, pd_stand, vla]
+↑↑↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 joint_list:
   - lumbar_yaw_joint
   - lumbar_roll_joint 
@@ -231,6 +233,20 @@ controllers:
                                 [0.8, -1.5,  0.4, 1.5],
                                 [0.8, -1.5, -0.8, 1.5],
                                 [1.0, -1.5,  0.0, 1.5]]
+
+  # vla
+  vla:
+    joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint, right_elbow_pitch_joint, right_elbow_yaw_joint, right_wrist_pitch_joint, right_wrist_roll_joint]
+    init_state: [0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0]
+    velocity:   [0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0]
+    effort:     [0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0]
+    stiffness:  [300.0, 300.0, 30.0,  300.0, 30.0,  30.0,  30.0]
+    damping:    [0.6,   0.6,   0.1,   0.6,   0.1,   0.1,   0.1]
+    redis_conf:
+      host: "127.0.0.1"
+      port: 6379
+      key: "joint_position"
+      timeout: 1
 
   # walk
   rl_walk_leg:
