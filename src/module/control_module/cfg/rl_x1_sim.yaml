@@ -59,7 +59,9 @@ robot_states:
     trigger_topic: /vla_mode
     pre_states: [stand, stand_&_vla]
     controllers: [pd_zero, pd_stand, vla]
-↑↑↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+# ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+
+# ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ joint_list ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 joint_list:
   - lumbar_yaw_joint
   - lumbar_roll_joint 
@@ -232,7 +234,8 @@ controllers:
                                 [0.8, -1.5, -0.8, 1.5],
                                 [0.8, -1.5,  0.4, 1.5],
                                 [0.8, -1.5, -0.8, 1.5],
-                                [1.0, -1.5,  0.0, 1.5]]
+                                [1.0, -1.5,  0.0, 1.5]
+                                ]
 
   # vla
   vla:

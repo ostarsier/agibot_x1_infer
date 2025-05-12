@@ -39,6 +39,13 @@ target_link_directories(
 find_package(std_msgs)
 find_package(sensor_msgs)
 find_package(geometry_msgs)
+# 查找 Redis 库
+find_package(PkgConfig REQUIRED)
+pkg_search_module(HIREDIS REQUIRED hiredis)
+
+# 添加头文件目录
+include_directories(${HIREDIS_INCLUDE_DIRS})
+
 target_link_libraries(
   ${CUR_TARGET_NAME}
   PRIVATE yaml-cpp::yaml-cpp
@@ -62,7 +69,8 @@ target_link_libraries(
          geometry_msgs::geometry_msgs__rosidl_typesupport_fastrtps_cpp
          geometry_msgs::geometry_msgs__rosidl_typesupport_introspection_cpp
          onnxruntime
-         ruckig)
+         ruckig
+         ${HIREDIS_LIBRARIES})
 
 # Set test of target
 if(XYBER_X1_INFER_BUILD_TESTS AND test_files)

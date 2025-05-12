@@ -154,7 +154,6 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
     }
     
     if (has_data) {
-      
       // 解析Redis中的数据，格式为JSON对象
       try {
         // 使用nlohmann/json解析JSON数据
@@ -170,13 +169,12 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
           
           // 输出调试信息
           std::cout << "Redis获取关节数据: " << joint_name << " = " << position_value << std::endl;
-            
-            // 查找关节在joint_names_中的索引
-            auto joint_it = std::find(joint_names_.begin(), joint_names_.end(), joint_name);
-            if (joint_it != joint_names_.end()) {
-              size_t index = std::distance(joint_names_.begin(), joint_it);
-              joint_cmd.position[index] = position_value;
-            }
+          
+          // 查找关节在joint_names_中的索引
+          auto joint_it = std::find(joint_names_.begin(), joint_names_.end(), joint_name);
+          if (joint_it != joint_names_.end()) {
+            size_t index = std::distance(joint_names_.begin(), joint_it);
+            joint_cmd.position[index] = position_value;
           }
         }
       } catch (const std::exception& e) {

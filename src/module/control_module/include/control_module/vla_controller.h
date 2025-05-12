@@ -8,7 +8,7 @@ namespace xyber_x1_infer::rl_control_module {
 class VLAController : public ControllerBase {
  public:
   VLAController(const bool use_sim_handles);
-  ~VLAController() = default;
+  ~VLAController();
 
   void Init(const YAML::Node &cfg_node) override;
   void RestartController() override;

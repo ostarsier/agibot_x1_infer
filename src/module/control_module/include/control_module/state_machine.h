@@ -1,3 +1,6 @@
+#ifndef CONTROL_MODULE_STATE_MACHINE_H_
+#define CONTROL_MODULE_STATE_MACHINE_H_
+
 #include <yaml-cpp/yaml.h>
 #include <iostream>
 #include <string>
@@ -71,3 +74,5 @@ class StateMachine {
 };
 
 }  // namespace xyber_x1_infer::rl_control_module
+
+#endif  // CONTROL_MODULE_STATE_MACHINE_H_
