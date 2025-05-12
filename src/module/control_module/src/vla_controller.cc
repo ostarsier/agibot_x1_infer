@@ -3,6 +3,8 @@
 #include <fstream>
 #include <hiredis/hiredis.h>
 #include <nlohmann/json.hpp>
+#include "aimrt_module_cpp_interface/logger/logger.h"
+#include "control_module/global.h"
 
 // 使用nlohmann/json库
 using json = nlohmann::json;
@@ -38,23 +40,7 @@ void VLAController::Init(const YAML::Node &cfg_node) {
   // 初始化 joint_conf_
   joint_conf_.init_state = Eigen::Map<vector_t>(cfg_node["init_state"].as<std::vector<double>>().data(), cfg_node["init_state"].as<std::vector<double>>().size());
   
-  // 读取velocity和effort值
-  if (cfg_node["velocity"]) {
-    joint_conf_.velocity = Eigen::Map<vector_t>(cfg_node["velocity"].as<std::vector<double>>().data(), cfg_node["velocity"].as<std::vector<double>>().size());
-  } else {
-    // 如果不存在，初始化为零
-    joint_conf_.velocity = Eigen::VectorXd::Zero(joint_names_.size());
-  }
-  
-  if (cfg_node["effort"]) {
-    joint_conf_.effort = Eigen::Map<vector_t>(cfg_node["effort"].as<std::vector<double>>().data(), cfg_node["effort"].as<std::vector<double>>().size());
-  } else {
-    // 如果不存在，初始化为零
-    joint_conf_.effort = Eigen::VectorXd::Zero(joint_names_.size());
-  }
-  
-  joint_conf_.stiffness = Eigen::Map<vector_t>(cfg_node["stiffness"].as<std::vector<double>>().data(), cfg_node["stiffness"].as<std::vector<double>>().size());
-  joint_conf_.damping = Eigen::Map<vector_t>(cfg_node["damping"].as<std::vector<double>>().data(), cfg_node["damping"].as<std::vector<double>>().size());
+  // 只保留position数据的初始化，其他的velocity、effort、stiffness、damping都删除
   
   // 从配置中获取Redis配置
   if (cfg_node["redis_conf"]) {
@@ -101,18 +87,6 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
   my_ros2_proto::msg::JointCommand joint_cmd;
   joint_cmd.name = joint_names_;
   joint_cmd.position.resize(joint_names_.size(), 0.0);
-  joint_cmd.velocity.resize(joint_names_.size(), 0.0);
-  joint_cmd.effort.resize(joint_names_.size(), 0.0);
-  joint_cmd.damping.resize(joint_names_.size(), 0.0);
-  joint_cmd.stiffness.resize(joint_names_.size(), 0.0);
-  
-  // 从配置文件中读取刚度、阻尼、速度和力矩值
-  for (size_t ii = 0; ii < joint_names_.size(); ii++) {
-    joint_cmd.stiffness[ii] = joint_conf_.stiffness(ii);
-    joint_cmd.damping[ii] = joint_conf_.damping(ii);
-    joint_cmd.velocity[ii] = joint_conf_.velocity(ii);
-    joint_cmd.effort[ii] = joint_conf_.effort(ii);
-  }
   
   try {
     // 使用初始化时创建的Redis连接获取数据
@@ -125,11 +99,11 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
       redis_ctx_ = redisConnectWithTimeout(redis_host_.c_str(), redis_port_, timeout);
       if (redis_ctx_ == nullptr || redis_ctx_->err) {
         if (redis_ctx_) {
-          std::cerr << "Redis重连失败: " << redis_ctx_->errstr << std::endl;
+          AIMRT_INFO("Redis重连失败: {}", redis_ctx_->errstr);
           redisFree(redis_ctx_);
           redis_ctx_ = nullptr;
         } else {
-          std::cerr << "Redis重连失败: 无法分配redis上下文" << std::endl;
+          AIMRT_INFO("Redis重连失败: 无法分配redis上下文");
         }
       }
     }
@@ -137,45 +111,69 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
     std::string joint_data;
     bool has_data = false;
     
-    // 使用BLPOP从列表中获取数据，超时时间为1秒
+    // 使用RPOP从列表中获取数据（非阻塞）
     if (redis_ctx_ && !redis_ctx_->err) {
-      redisReply* reply = (redisReply*)redisCommand(redis_ctx_, "BLPOP %s 1", redis_key_.c_str());
+      redisReply* reply = (redisReply*)redisCommand(redis_ctx_, "RPOP %s", redis_key_.c_str());
       if (reply != nullptr) {
-        // BLPOP返回一个包含两个元素的数组：键名和值
-        if (reply->type == REDIS_REPLY_ARRAY && reply->elements == 2) {
-          joint_data = reply->element[1]->str; // 第二个元素是值
+        // RPOP直接返回值，如果列表为空则返回nil
+        if (reply->type == REDIS_REPLY_STRING) {
+          joint_data = reply->str;
           has_data = true;
-          std::cout << "Redis获取到数据: " << joint_data << std::endl;
+          AIMRT_INFO("Redis获取到数据: {}", joint_data);
+          freeReplyObject(reply);
+        } else if (reply->type == REDIS_REPLY_NIL) {
+          freeReplyObject(reply);
+          joint_cmd.name.clear(); // 将 name 设置为空列表,就不会覆盖掉对应关节的值 
+          return joint_cmd; // 返回默认值初始化的命令
+        } else {
+          // 处理其他可能的回复类型
+          freeReplyObject(reply);
         }
-        freeReplyObject(reply);
       } else {
-        std::cerr << "Redis BLPOP错误: " << (redis_ctx_->errstr ? redis_ctx_->errstr : "未知错误") << std::endl;
+        AIMRT_INFO("Redis RPOP错误: {}", (redis_ctx_->errstr ? redis_ctx_->errstr : "未知错误"));
       }
     }
     
     if (has_data) {
-      // 解析Redis中的数据，格式为JSON对象
+      // 解析Redis中的数据，格式为JSON数组，顺序与joint_list一致
       try {
         // 使用nlohmann/json解析JSON数据
-        json joint_json = json::parse(joint_data);
+        json joint_array = json::parse(joint_data);
         
-        // 遍历JSON对象中的所有键值对
-        for (auto it = joint_json.begin(); it != joint_json.end(); ++it) {
+        // 确保解析的数据是一个数组
+        if (!joint_array.is_array()) {
+          std::cerr << "Redis数据格式错误: 期望JSON数组，实际获取: " << joint_data << std::endl;
+          // 使用默认值
+          for (size_t ii = 0; ii < joint_names_.size(); ii++) {
+            joint_cmd.position[ii] = joint_conf_.init_state(ii);
+          }
+          return joint_cmd;
+        }
+        
+        // 检查数组大小
+        if (joint_array.size() != joint_names_.size()) {
+          std::cerr << "Redis数据大小不匹配: 期望 " << joint_names_.size() 
+                    << " 个元素，实际获取 " << joint_array.size() << " 个元素" << std::endl;
+          // 使用默认值
+          for (size_t ii = 0; ii < joint_names_.size(); ii++) {
+            joint_cmd.position[ii] = joint_conf_.init_state(ii);
+          }
+          return joint_cmd;
+        }
+        
+        // 遍历JSON数组，按照joint_list的顺序解析数据
+        for (size_t i = 0; i < joint_array.size(); ++i) {
           // 获取关节名称
-          std::string joint_name = it.key();
+          std::string joint_name = joint_names_[i];
           
           // 获取关节位置值
-          double position_value = it.value().get<double>();
+          double position_value = joint_array[i].get<double>();
           
           // 输出调试信息
-          std::cout << "Redis获取关节数据: " << joint_name << " = " << position_value << std::endl;
+          std::cout << "Redis获取关节数据: " << joint_names_[i] << " = " << position_value << std::endl;
           
-          // 查找关节在joint_names_中的索引
-          auto joint_it = std::find(joint_names_.begin(), joint_names_.end(), joint_name);
-          if (joint_it != joint_names_.end()) {
-            size_t index = std::distance(joint_names_.begin(), joint_it);
-            joint_cmd.position[index] = position_value;
-          }
+          // 直接使用数组索引i作为关节索引
+          joint_cmd.position[i] = position_value;
         }
       } catch (const std::exception& e) {
         std::cerr << "Redis数据解析错误: " << e.what() << std::endl;

@@ -34,7 +34,6 @@ class ControllerBase {
   struct JointConf {
     vector_t init_state;
     vector_t velocity;
-    vector_t effort;
     vector_t stiffness;
     vector_t damping;
   } joint_conf_;

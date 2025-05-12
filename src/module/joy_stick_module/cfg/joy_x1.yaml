@@ -9,7 +9,7 @@ float_pubs:
     buttons: [0]
   - topic_name: /walk_mode
     buttons: [2]
-  - topic_name: /walk_mode2
+  - topic_name: /vla_mode
     buttons: [3]
   - topic_name: /keep_mode
     buttons: [6]

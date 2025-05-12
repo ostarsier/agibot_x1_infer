@@ -241,15 +241,10 @@ controllers:
   vla:
     joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint, right_elbow_pitch_joint, right_elbow_yaw_joint, right_wrist_pitch_joint, right_wrist_roll_joint]
     init_state: [0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0]
-    velocity:   [0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0]
-    effort:     [0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0]
-    stiffness:  [300.0, 300.0, 30.0,  300.0, 30.0,  30.0,  30.0]
-    damping:    [0.6,   0.6,   0.1,   0.6,   0.1,   0.1,   0.1]
     redis_conf:
-      host: "127.0.0.1"
+      host: "192.168.110.91"
       port: 6379
       key: "joint_position"
-      timeout: 1
 
   # walk
   rl_walk_leg:
