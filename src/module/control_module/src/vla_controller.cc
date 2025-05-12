@@ -1,13 +1,20 @@
 #include "control_module/vla_controller.h"
 #include <iostream>
 #include <fstream>
-#include <sw/redis++/redis++.h>
+#include <hiredis/hiredis.h>
 #include <nlohmann/json.hpp>
 
 // 使用nlohmann/json库
 using json = nlohmann::json;
 
 namespace xyber_x1_infer::rl_control_module {
+
+VLAController::~VLAController() {
+  if (redis_ctx_) {
+    redisFree(redis_ctx_);
+    redis_ctx_ = nullptr;
+  }
+}
 
 VLAController::VLAController(const bool use_sim_handles)
     : ControllerBase(use_sim_handles) {}
@@ -66,13 +73,18 @@ void VLAController::Init(const YAML::Node &cfg_node) {
   }
   
   // 初始化Redis连接
-  try {
-    std::string redis_url = "tcp://" + redis_host_ + ":" + std::to_string(redis_port_);
-    redis_ = std::make_unique<sw::redis::Redis>(redis_url);
-    std::cout << "Redis连接初始化成功: " << redis_url << std::endl;
-  } catch (const std::exception& e) {
-    std::cerr << "Redis连接初始化失败: " << e.what() << std::endl;
-    redis_ = nullptr;
+  struct timeval timeout = {redis_timeout_, 0}; // 设置超时时间
+  redis_ctx_ = redisConnectWithTimeout(redis_host_.c_str(), redis_port_, timeout);
+  if (redis_ctx_ == nullptr || redis_ctx_->err) {
+    if (redis_ctx_) {
+      std::cerr << "Redis连接初始化失败: " << redis_ctx_->errstr << std::endl;
+      redisFree(redis_ctx_);
+      redis_ctx_ = nullptr;
+    } else {
+      std::cerr << "Redis连接初始化失败: 无法分配redis上下文" << std::endl;
+    }
+  } else {
+    std::cout << "Redis连接初始化成功: " << redis_host_ << ":" << redis_port_ << std::endl;
   }
 }
 
@@ -104,27 +116,41 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
   
   try {
     // 使用初始化时创建的Redis连接获取数据
-    if (!redis_) {
-      // 如果Redis连接不存在，尝试重新创建
-      std::string redis_url = "tcp://" + redis_host_ + ":" + std::to_string(redis_port_);
-      redis_ = std::make_unique<sw::redis::Redis>(redis_url);
+    if (!redis_ctx_ || redis_ctx_->err) {
+      // 如果Redis连接不存在或有错误，尝试重新创建
+      if (redis_ctx_) {
+        redisFree(redis_ctx_);
+      }
+      struct timeval timeout = {1, 0}; // 设置超时时间为1秒
+      redis_ctx_ = redisConnectWithTimeout(redis_host_.c_str(), redis_port_, timeout);
+      if (redis_ctx_ == nullptr || redis_ctx_->err) {
+        if (redis_ctx_) {
+          std::cerr << "Redis重连失败: " << redis_ctx_->errstr << std::endl;
+          redisFree(redis_ctx_);
+          redis_ctx_ = nullptr;
+        } else {
+          std::cerr << "Redis重连失败: 无法分配redis上下文" << std::endl;
+        }
+      }
     }
     
     std::string joint_data;
-    
-    // 使用blpop从列表中获取数据
-    std::pair<std::string, std::string> result;
     bool has_data = false;
     
-    // 非阻塞方式获取数据，超时时间为1秒
-    try {
-      has_data = redis_->blpop(redis_key_, 1, result);
-      if (has_data) {
-        joint_data = result.second; // 第二个元素是值，第一个是键名
-        std::cout << "Redis获取到数据: " << joint_data << std::endl;
+    // 使用BLPOP从列表中获取数据，超时时间为1秒
+    if (redis_ctx_ && !redis_ctx_->err) {
+      redisReply* reply = (redisReply*)redisCommand(redis_ctx_, "BLPOP %s 1", redis_key_.c_str());
+      if (reply != nullptr) {
+        // BLPOP返回一个包含两个元素的数组：键名和值
+        if (reply->type == REDIS_REPLY_ARRAY && reply->elements == 2) {
+          joint_data = reply->element[1]->str; // 第二个元素是值
+          has_data = true;
+          std::cout << "Redis获取到数据: " << joint_data << std::endl;
+        }
+        freeReplyObject(reply);
+      } else {
+        std::cerr << "Redis BLPOP错误: " << (redis_ctx_->errstr ? redis_ctx_->errstr : "未知错误") << std::endl;
       }
-    } catch (const std::exception& e) {
-      std::cerr << "Redis blpop错误: " << e.what() << std::endl;
     }
     
     if (has_data) {

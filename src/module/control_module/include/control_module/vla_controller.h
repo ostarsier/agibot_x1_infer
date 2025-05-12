@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include <sw/redis++/redis++.h>
+#include <hiredis/hiredis.h>
 #include "control_module/controller_base.h"
 
 namespace xyber_x1_infer::rl_control_module {
@@ -23,7 +23,7 @@ class VLAController : public ControllerBase {
   int redis_timeout_ = 0; // blpop超时时间，0表示无限等待
   
   // Redis连接对象
-  std::unique_ptr<sw::redis::Redis> redis_{nullptr};
+  redisContext* redis_ctx_{nullptr};
 };
 
 }  // namespace xyber_x1_infer::rl_control_module
