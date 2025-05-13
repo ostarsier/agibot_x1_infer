@@ -122,10 +122,10 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
       return joint_cmd;
     }
     
-    // 使用RPOP从列表中获取数据（非阻塞）
-    redisReply* reply = (redisReply*)redisCommand(redis_ctx_, "RPOP %s", redis_key_.c_str());
+    // 使用GET命令获取键值数据
+    redisReply* reply = (redisReply*)redisCommand(redis_ctx_, "GET %s", redis_key_.c_str());
     if (reply != nullptr) {
-      // RPOP直接返回值，如果列表为空则返回nil
+      // GET直接返回键值，如果键不存在则返回nil
       if (reply->type == REDIS_REPLY_STRING) {
         joint_data = reply->str;
         success = true;
@@ -135,7 +135,7 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
       }
       freeReplyObject(reply);
     } else {
-      AIMRT_INFO("Redis RPOP错误: {}", (redis_ctx_->errstr ? redis_ctx_->errstr : "未知错误"));
+      AIMRT_INFO("Redis GET错误: {}", (redis_ctx_->errstr ? redis_ctx_->errstr : "未知错误"));
     }
     
     if (success) {
@@ -155,10 +155,6 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
           for (size_t i = 0; i < joint_array.size(); ++i) {
             // 获取关节位置值
             double position_value = joint_array[i].get<double>();
-            
-            // 输出调试信息
-            AIMRT_INFO("Redis获取关节数据: {} = {}", joint_names_[i], position_value);
-            
             // 直接使用数组索引i作为关节索引
             joint_cmd.position[i] = position_value;
             // 速度和力矩设置为0作为安全默认值

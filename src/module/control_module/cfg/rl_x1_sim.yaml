@@ -22,37 +22,37 @@ robot_states:
   # 零模式
   zero:
     trigger_topic: /zero_mode
-    pre_states: [idle, keep, stand, stand_&_plan]
+    pre_states: [idle, keep, stand, stand_&_plan, stand_&_vla]
     controllers: [pd_zero]
   # 站立模式
   stand:
     trigger_topic: /stand_mode
-    pre_states: [zero, stand_&_plan, keep_&_plan, walk_leg_&_plan, walk_leg, walk_leg_arm]
+    pre_states: [zero, stand_&_plan, keep_&_plan, walk_leg_&_plan, walk_leg, walk_leg_arm, stand_&_vla]
     controllers: [pd_zero, pd_stand]
 
   # 行走模式1
   walk_leg:
     trigger_topic: /walk_mode
-    pre_states: [stand_&_plan, walk_leg_&_plan, stand, walk_leg_arm]
+    pre_states: [stand_&_plan, walk_leg_&_plan, stand, walk_leg_arm, stand_&_vla]
     controllers: [pd_zero, pd_stand, rl_walk_leg]
   # 行走模式2
   walk_leg_arm:
     trigger_topic: /walk_mode2
-    pre_states: [stand_&_plan, walk_leg_&_plan, stand, walk_leg]
+    pre_states: [stand_&_plan, walk_leg_&_plan, stand, walk_leg, stand_&_vla]
     controllers: [pd_zero, pd_stand, rl_walk_leg_shoulder]
 
   # plan模式
   stand_&_plan:
     trigger_topic: /plan_mode
-    pre_states: [stand, stand_&_plan]
+    pre_states: [stand, stand_&_plan, stand_&_vla]
     controllers: [pd_zero, pd_stand, pd_plan]
   keep_&_plan:
     trigger_topic: /plan_mode
-    pre_states: [keep, keep_&_plan]
+    pre_states: [keep, keep_&_plan, stand_&_vla]
     controllers: [pd_keep, pd_plan]
   walk_leg_&_plan:
     trigger_topic: /plan_mode
-    pre_states: [walk_leg, walk_leg_&_plan]
+    pre_states: [walk_leg, walk_leg_&_plan, stand_&_vla]
     controllers: [pd_zero, pd_stand, rl_walk_leg, pd_plan]
   # vla模式
   stand_&_vla:
