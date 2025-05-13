@@ -11,49 +11,55 @@ robot_states:
   # 空闲模式 
   idle:
     trigger_topic: /idle_mode
-    pre_states: [keep, stand_&_plan, keep_&_plan, walk_leg_&_plan, zero, stand, walk_leg, walk_leg_arm]
+    pre_states: [keep, stand_&_plan, keep_&_plan, walk_leg_&_plan, zero, stand, walk_leg, walk_leg_arm, stand_&_vla]
     controllers: [pd_idle]
   # keep模式
   keep:
     trigger_topic: /keep_mode
-    pre_states: [idle, stand_&_plan, keep_&_plan, wa_&_plan, zero, stand, walk_leg, walk_leg_arm]
+    pre_states: [idle, stand_&_plan, keep_&_plan, wa_&_plan, zero, stand, walk_leg, walk_leg_arm, stand_&_vla]
     controllers: [pd_keep]
 
   # 零模式
   zero:
     trigger_topic: /zero_mode
-    pre_states: [idle, keep, stand, stand_&_plan]
+    pre_states: [idle, keep, stand, stand_&_plan, stand_&_vla]
     controllers: [pd_zero]
   # 站立模式
   stand:
     trigger_topic: /stand_mode
-    pre_states: [zero, stand_&_plan, keep_&_plan, walk_leg_&_plan, walk_leg, walk_leg_arm]
+    pre_states: [zero, stand_&_plan, keep_&_plan, walk_leg_&_plan, walk_leg, walk_leg_arm, stand_&_vla]
     controllers: [pd_zero, pd_stand]
 
   # 行走模式1
   walk_leg:
     trigger_topic: /walk_mode
-    pre_states: [stand_&_plan, walk_leg_&_plan, stand, walk_leg_arm]
+    pre_states: [stand_&_plan, walk_leg_&_plan, stand, walk_leg_arm, stand_&_vla]
     controllers: [pd_zero, pd_stand, rl_walk_leg]
   # 行走模式2
   walk_leg_arm:
     trigger_topic: /walk_mode2
-    pre_states: [stand_&_plan, walk_leg_&_plan, stand, walk_leg]
+    pre_states: [stand_&_plan, walk_leg_&_plan, stand, walk_leg, stand_&_vla]
     controllers: [pd_zero, pd_stand, rl_walk_leg_shoulder]
 
   # plan模式
   stand_&_plan:
     trigger_topic: /plan_mode
-    pre_states: [stand, stand_&_plan]
+    pre_states: [stand, stand_&_plan, stand_&_vla]
     controllers: [pd_zero, pd_stand, pd_plan]
   keep_&_plan:
     trigger_topic: /plan_mode
-    pre_states: [keep, keep_&_plan]
+    pre_states: [keep, keep_&_plan, stand_&_vla]
     controllers: [pd_keep, pd_plan]
   walk_leg_&_plan:
     trigger_topic: /plan_mode
-    pre_states: [walk_leg, walk_leg_&_plan]
+    pre_states: [walk_leg, walk_leg_&_plan, stand_&_vla]
     controllers: [pd_zero, pd_stand, rl_walk_leg, pd_plan]
+
+  # vla模式
+  stand_&_vla:
+    trigger_topic: /vla_mode
+    pre_states: [zero, stand, stand_&_vla]
+    controllers: [pd_zero, pd_stand, vla]
 # ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
 
@@ -230,7 +236,23 @@ controllers:
                                 [0.8, -1.5,  0.8, 1.5],
                                 [0.8, -1.5, -0.8, 1.5],
                                 [1.0, -1.5,  0.0, 1.5]]
-
+  # vla
+  vla:
+    joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint,
+     right_elbow_pitch_joint, right_elbow_yaw_joint, 
+     right_wrist_pitch_joint, right_wrist_roll_joint]
+    stiffness:  [300.0, 300.0, 300.0,
+                 300.0, 300.0,
+                 300.0, 300.0]
+    damping:    [0.6,   0.6,   0.6,
+                 0.6,   0.6,
+                 0.6,   0.6]
+    redis_conf:
+      host: "192.168.110.91"
+      port: 6379
+      key: "joint_position"
+      timeout: 2
+      
   # walk
   rl_walk_leg:
     joint_list: [left_hip_pitch_joint, left_hip_roll_joint, left_hip_yaw_joint, left_knee_pitch_joint, left_ankle_pitch_joint, left_ankle_roll_joint,
