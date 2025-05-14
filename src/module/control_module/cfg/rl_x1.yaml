@@ -241,9 +241,9 @@ controllers:
     joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint,
      right_elbow_pitch_joint, right_elbow_yaw_joint, 
      right_wrist_pitch_joint, right_wrist_roll_joint]
-    stiffness:  [300.0, 300.0, 300.0,
-                 300.0, 300.0,
-                 300.0, 300.0]
+    stiffness:  [40.0, 40.0, 40.0,
+                 40.0, 40.0,
+                 40.0, 40.0]
     damping:    [0.6,   0.6,   0.6,
                  0.6,   0.6,
                  0.6,   0.6]

@@ -84,3 +84,9 @@ LPUSH joint_position '[0.0,0.0,0.0,100,0.0,0.0,0.0]' 
 
 joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint, right_elbow_pitch_joint, right_elbow_yaw_joint, right_wrist_pitch_joint, right_wrist_roll_joint]
     init_state: [0.0,   0.0,   0.0,   100,   0.0,   0.0,   0.0]
+
+
+
+# c++ dependency
+sudo apt install libhiredis-dev
+sudo apt install nlohmann-json3-dev
