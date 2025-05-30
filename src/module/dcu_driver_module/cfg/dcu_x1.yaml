@@ -256,7 +256,7 @@ transmission:                               # 传动层配置
     type: SimpleTransmission
     joint: right_shoulder_yaw_joint
     actuator: right_shoulder_yaw_actuator
-    direction: 1.0
+    direction: -1.0
 
   - name: right_elbow_pitch_trans
     type: SimpleTransmission
@@ -268,7 +268,7 @@ transmission:                               # 传动层配置
     type: SimpleTransmission
     joint: right_elbow_yaw_joint
     actuator: right_elbow_yaw_actuator
-    direction: 1.0
+    direction: -1.0
 
   - name: right_wrist_parallel_trans
     type: RightWristParallelTransmission
