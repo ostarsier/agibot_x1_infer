@@ -73,6 +73,7 @@ joint_list:
   - left_elbow_yaw_joint
   - left_wrist_pitch_joint
   - left_wrist_roll_joint
+  - left_claw_joint
   - right_shoulder_pitch_joint
   - right_shoulder_roll_joint
   - right_shoulder_yaw_joint
@@ -80,6 +81,7 @@ joint_list:
   - right_elbow_yaw_joint
   - right_wrist_pitch_joint
   - right_wrist_roll_joint
+  - right_claw_joint
   - left_hip_pitch_joint
   - left_hip_roll_joint
   - left_hip_yaw_joint
@@ -241,17 +243,20 @@ controllers:
   vla:
     joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint,
      right_elbow_pitch_joint, right_elbow_yaw_joint, 
-     right_wrist_pitch_joint, right_wrist_roll_joint
-     ]
-    init_state: [0.0,   0.0,   0.0,
+     right_wrist_pitch_joint, right_wrist_roll_joint,
+     right_claw_joint]
+    init_state: [0.0,   -0.5,   0.0,
                  0.0,   0.0,   0.0,
-                 0.0,   0.0]
+                 0.0,   0.0,
+                 0.0]
     stiffness:  [40.0, 40.0, 40.0,
                  40.0, 40.0,
-                 40.0, 40.0]
+                 40.0, 40.0,
+                 0.0]
     damping:    [0.6,   0.6,   0.6,
                  0.6,   0.6,
-                 0.6,   0.6]
+                 0.6,   0.6,
+                 0.0]
     redis_conf:
       host: "192.168.110.91"
       port: 6379

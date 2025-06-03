@@ -151,22 +151,51 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
           // 检查数组大小
           AIMRT_INFO("Redis数据大小不匹配: 期望 {} 个元素，实际获取 {} 个元素", joint_names_.size(), joint_array.size());
         } else {
+          // 清除原始的joint_cmd数据，只添加有值的关节
+          joint_cmd.name.clear();
+          joint_cmd.position.clear();
+          joint_cmd.velocity.clear();
+          joint_cmd.effort.clear();
+          
           // 遍历JSON数组，按照joint_list的顺序解析数据
           for (size_t i = 0; i < joint_array.size(); ++i) {
-            // 获取关节位置值
-            double position_value = joint_array[i].get<double>();
-            // 直接使用数组索引i作为关节索引
-            joint_cmd.position[i] = position_value;
-            // 速度和力矩设置为0作为安全默认值
-            joint_cmd.velocity[i] = 0.0;
-            joint_cmd.effort[i] = 0.0;
+            // 检查关节值是否为null或空字符串
+            if (joint_array[i].is_null() || 
+                (joint_array[i].is_string() && joint_array[i].get<std::string>().empty())) {
+              // 跳过没有值的关节
+              continue;
+            }
+            
+            try {
+              // 获取关节位置值
+              double position_value = joint_array[i].get<double>();
+              
+              // 只添加有值的关节
+              joint_cmd.name.push_back(joint_names_[i]);
+              joint_cmd.position.push_back(position_value);
+              joint_cmd.velocity.push_back(0.0);  // 速度设为0作为安全默认值
+              joint_cmd.effort.push_back(0.0);    // 力矩设为0作为安全默认值
+            } catch (const std::exception& e) {
+              AIMRT_INFO("解析关节 {} 的值失败: {}", joint_names_[i], e.what());
+              // 解析失败则跳过该关节
+            }
           }
-          // 只有在成功获取并解析数据时，才设置joint_cmd.name = joint_names_
-          joint_cmd.name = joint_names_;
           // 设置刚度和阻尼参数
+          // 根据实际添加的关节，设置对应的刚度和阻尼参数
+          joint_cmd.stiffness.clear();
+          joint_cmd.damping.clear();
+          
           if(stiffness_.size() == joint_names_.size() && damping_.size() == joint_names_.size()) {
-            joint_cmd.stiffness = stiffness_;
-            joint_cmd.damping = damping_;
+            // 只为添加到joint_cmd的关节设置刚度和阻尼
+            for (size_t i = 0; i < joint_cmd.name.size(); ++i) {
+              // 查找关节在原始joint_names_中的位置
+              auto it = std::find(joint_names_.begin(), joint_names_.end(), joint_cmd.name[i]);
+              if (it != joint_names_.end()) {
+                size_t idx = std::distance(joint_names_.begin(), it);
+                joint_cmd.stiffness.push_back(stiffness_[idx]);
+                joint_cmd.damping.push_back(damping_[idx]);
+              }
+            }
           } else {
             AIMRT_INFO("刚度阻尼参数数量与关节数量不匹配");
           }
