@@ -186,8 +186,8 @@ controllers:
                 left_hip_pitch_joint, left_hip_roll_joint, left_hip_yaw_joint, left_knee_pitch_joint, left_ankle_pitch_joint, left_ankle_roll_joint, 
                 right_hip_pitch_joint, right_hip_roll_joint, right_hip_yaw_joint, right_knee_pitch_joint, right_ankle_pitch_joint, right_ankle_roll_joint]
     init_state: [0.0,   0.0,   0.0,
-                 0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0,
-                 0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   0.0,  
+                 0.0,   -0.5,   0.0,   0.0,   0.0,   0.0,   0.0,
+                 0.0,   -0.5,   0.0,   0.0,   0.0,   0.0,   0.0,  
                  0.0,   0.0,   0.0,   0.0,   0.0,   0.0,   
                  0.0,   0.0,   0.0,   0.0,   0.0,   0.0]
     stiffness:  [700.0, 700.0, 700.0,
@@ -242,6 +242,9 @@ controllers:
     joint_list: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint,
      right_elbow_pitch_joint, right_elbow_yaw_joint, 
      right_wrist_pitch_joint, right_wrist_roll_joint]
+    init_state: [0.0,   0.0,   0.0,
+                 0.0,   0.0,   0.0,
+                 0.0,   0.0]
     stiffness:  [300.0, 300.0, 300.0,
                  300.0, 300.0,
                  300.0, 300.0]
