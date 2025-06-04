@@ -27,6 +27,10 @@ bool DcuDriverModule::Initialize(aimrt::CoreRef core) {
     enable_actuator_ = cfg_node["enable_actuator"].as<bool>();
     publish_frequecy_ = cfg_node["publish_frequecy"].as<double>();
     joint_name_list_ = cfg_node["joint_list"].as<std::vector<std::string>>();
+    AIMRT_INFO("Initialized joint_name_list_ with {} joints:", joint_name_list_.size());
+    for (const auto& joint_name : joint_name_list_) {
+      AIMRT_INFO("- {}", joint_name);
+    }
     actuator_name_list_ = cfg_node["actuator_list"].as<std::vector<std::string>>();
 
     // Init DCU SDK
@@ -467,7 +471,7 @@ void DcuDriverModule::PublishLoop() {
 
 void DcuDriverModule::JointCmdCallback(
     const std::shared_ptr<const my_ros2_proto::msg::JointCommand>& msg) {
-  // AIMRT_DEBUG("Received joint cmd data: {}", my_ros2_proto::msg::to_yaml(*msg));
+  AIMRT_INFO("Received joint cmd data: {}", my_ros2_proto::msg::to_yaml(*msg));
   if (!is_running_) return;
 
   // cache cmd data

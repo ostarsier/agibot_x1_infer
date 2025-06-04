@@ -38,7 +38,7 @@ joint_list:                   # 关节列表
   - right_elbow_yaw_joint
   - right_wrist_pitch_joint
   - right_wrist_roll_joint
-  - right_claw_joint      
+  - right_claw_joint
 
 actuator_list:  # 执行器列表
   - left_hip_pitch_actuator

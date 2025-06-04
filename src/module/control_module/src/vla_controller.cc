@@ -77,6 +77,18 @@ void VLAController::Init(const YAML::Node &cfg_node) {
     }
   } else {
     AIMRT_INFO("Redis连接初始化成功: {}:{}", redis_host_, redis_port_);
+    // 清空 redis_key_
+    redisReply *reply = (redisReply *)redisCommand(redis_ctx_, "DEL %s", redis_key_.c_str());
+    if (reply == nullptr) {
+      AIMRT_ERROR("执行 DEL {} 失败: redisCommand 返回 nullptr, 可能原因: {}", redis_key_, redis_ctx_->errstr);
+    } else {
+      if (reply->type == REDIS_REPLY_ERROR) {
+        AIMRT_ERROR("执行 DEL {} 失败: {}", redis_key_, reply->str);
+      } else {
+        AIMRT_INFO("成功执行 DEL {}，影响的键数量: %lld", redis_key_.c_str(), reply->integer);
+      }
+      freeReplyObject(reply);
+    }
   }
 }
 
