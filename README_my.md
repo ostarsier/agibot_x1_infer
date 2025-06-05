@@ -6,7 +6,7 @@
 # 上传
 scp -r /home/yonsvm/code/agibot_x1_infer/src robot@192.168.110.247:/home/robot/cjd/agibot_x1_infer_vla/
 
-
+ssh robot@192.168.110.247
 
 
 

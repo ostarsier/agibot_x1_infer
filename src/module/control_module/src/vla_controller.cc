@@ -186,7 +186,11 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
               joint_cmd.name.push_back(joint_names_[i]);
               joint_cmd.position.push_back(position_value);
               joint_cmd.velocity.push_back(0.0);  // 速度设为0作为安全默认值
-              joint_cmd.effort.push_back(0.0);    // 力矩设为0作为安全默认值
+              if (joint_names_[i] == "left_claw_joint" || joint_names_[i] == "right_claw_joint") {
+                joint_cmd.effort.push_back(1.0);
+              } else {
+                joint_cmd.effort.push_back(0.0);
+              }
             } catch (const std::exception& e) {
               AIMRT_INFO("解析关节 {} 的值失败: {}", joint_names_[i], e.what());
               // 解析失败则跳过该关节
@@ -230,7 +234,7 @@ my_ros2_proto::msg::JointCommand VLAController::GetJointCmdData() {
     joint_data_json["damping"] = joint_cmd.damping;
     joint_data_json["velocity"] = joint_cmd.velocity;
     joint_data_json["effort"] = joint_cmd.effort;
-    AIMRT_INFO("发送 joint_cmd {}", joint_data_json.dump());
+    AIMRT_INFO("vla 233行 发送 joint_cmd {}", joint_data_json.dump());
   }
   
   return joint_cmd;

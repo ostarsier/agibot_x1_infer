@@ -471,7 +471,7 @@ void DcuDriverModule::PublishLoop() {
 
 void DcuDriverModule::JointCmdCallback(
     const std::shared_ptr<const my_ros2_proto::msg::JointCommand>& msg) {
-  AIMRT_INFO("Received joint cmd data: {}", my_ros2_proto::msg::to_yaml(*msg));
+  AIMRT_INFO("dcu_driver_module 474行 Received joint cmd data: {}", my_ros2_proto::msg::to_yaml(*msg));
   if (!is_running_) return;
 
   // cache cmd data

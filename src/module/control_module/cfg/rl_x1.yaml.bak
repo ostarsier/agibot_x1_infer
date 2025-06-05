@@ -65,9 +65,21 @@ robot_states:
 
 # ↓↓↓↓↓↓↓3+8+8+6+6=31↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ joint_list ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 joint_list:
-  - lumbar_yaw_joint
-  - lumbar_roll_joint 
+  - left_hip_pitch_joint
+  - left_hip_roll_joint
+  - left_hip_yaw_joint
+  - left_knee_pitch_joint
+  - left_ankle_pitch_joint
+  - left_ankle_roll_joint
+  - right_hip_pitch_joint
+  - right_hip_roll_joint
+  - right_hip_yaw_joint
+  - right_knee_pitch_joint
+  - right_ankle_pitch_joint
+  - right_ankle_roll_joint
+  - lumbar_roll_joint
   - lumbar_pitch_joint
+  - lumbar_yaw_joint
   - left_shoulder_pitch_joint
   - left_shoulder_roll_joint
   - left_shoulder_yaw_joint
@@ -84,18 +96,6 @@ joint_list:
   - right_wrist_pitch_joint
   - right_wrist_roll_joint
   - right_claw_joint
-  - left_hip_pitch_joint
-  - left_hip_roll_joint
-  - left_hip_yaw_joint
-  - left_knee_pitch_joint
-  - left_ankle_pitch_joint
-  - left_ankle_roll_joint
-  - right_hip_pitch_joint
-  - right_hip_roll_joint
-  - right_hip_yaw_joint
-  - right_knee_pitch_joint
-  - right_ankle_pitch_joint
-  - right_ankle_roll_joint
 # ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
 # ↓↓↓↓↓↓↓↓↓↓↓ 针对执行器标零后的真机装配偏移量，对与URDF不一致的关节进行补偿 ↓↓↓↓↓↓↓↓↓↓↓↓↓
@@ -261,7 +261,7 @@ controllers:
     init_state: [0.0,   -0.3,   0.0,
                  0.0,   0.0,
                  0.0,   0.0,
-                 0.0]
+                 0.5]
     stiffness:  [40.0, 40.0, 40.0,
                  40.0, 40.0,
                  40.0, 40.0,
